@@ -3,14 +3,11 @@
 #include "heltec.h"
 #include "setup_tasks.hpp"
 
-// #include "BME280.h"
 #include <Adafruit_BME280.h>
 #include <Wire.h>
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 
-// BME280 bme(Wire,0x76);
-// TwoWire secondI2C =
 Adafruit_BME280 bme;
 
 void read_bmp_code(void* parameters) {
@@ -52,7 +49,7 @@ void read_bmp_code(void* parameters) {
     xQueueSend(plot_oled_queue_altitude, &altitude, portMAX_DELAY);
     xQueueSend(sender_lora_queue_altitude, &altitude, portMAX_DELAY);
     xQueueSend(sender_lora_queue_time, &timer, portMAX_DELAY);
-    xSemaphoreGive(lora_semaphore);
+    // xSemaphoreGive(lora_semaphore);
     // vTaskResume(sender_lora_task);
     // xQueueSend(plot_oled_queue_altitude, &altitude, pdMS_TO_TICKS(1));
     // xQueueSend(plot_oled_queue_pressure, &pressure, portMAX_DELAY);
@@ -62,7 +59,7 @@ void read_bmp_code(void* parameters) {
     //   first = false;
     // }
 
-    vTaskDelay(pdMS_TO_TICKS(80));
+    vTaskDelay(pdMS_TO_TICKS(35));
   }
 }
 
