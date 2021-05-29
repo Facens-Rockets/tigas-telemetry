@@ -3,7 +3,7 @@
 #include "heltec.h"
 #include "setup_tasks.hpp"
 
-#define buzzer_pin 12
+#define buzzer_pin 13
 
 void buzzer_alarm_code(void* parameters) {
   bool recovery = false;

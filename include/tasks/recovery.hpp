@@ -5,7 +5,7 @@
 
 #define BME_SCALE 1
 
-#define recovery_pin 13
+#define recovery_pin 12
 
 void trigger_recovery() {
   digitalWrite(recovery_pin, HIGH);
