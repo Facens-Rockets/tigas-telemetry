@@ -10,7 +10,7 @@ void plot_oled_code(void* parameters) {
   // float initial_altitude = 0;
   float max_altitude = 0;
   float variation = 0;
-  // bool first = true;
+  float max_variation = 0;
   bool recovery = false;
 
   // xQueueReceive(plot_oled_queue_altitude, &altitude, portMAX_DELAY);
@@ -22,16 +22,19 @@ void plot_oled_code(void* parameters) {
     xQueueReceive(plot_oled_queue_recovery, &recovery, 1);
     xQueueReceive(plot_oled_queue_max_altitude, &max_altitude, 1);
 
+    if(variation > max_variation)
+      max_variation = variation;
+
     Heltec.display->clear();
 
     Heltec.display->setFont(ArialMT_Plain_10);
     // Heltec.display->drawString(0, 0, "Presure: " + String(pressure) + " Pa");
     Heltec.display->drawString(0, 0, "Altitude: " + String(altitude) + " mts");
-    Heltec.display->drawString(0, 20,
-                               "Variação: " + String(variation) + " mts");
     Heltec.display->drawString(0, 10, "Altitude Max: " + String(max_altitude) + " mts");
-    Heltec.display->drawString(0, 30, "Variação Max: " + String(max_altitude) + " mts");
-    Heltec.display->drawString(0, 40, recovery ? "Recovery Triggered" : "Recovery waiting...");
+    Heltec.display->drawString(0, 30,
+                               "Variação: " + String(variation) + " mts");
+    Heltec.display->drawString(0, 40, "Variação Max: " + String(max_variation) + " mts");
+    Heltec.display->drawString(0, 50, recovery ? "Recovery Triggered" : "Recovery waiting...");
                                
     Heltec.display->display();
     // Serial.println(millis() - timer);
