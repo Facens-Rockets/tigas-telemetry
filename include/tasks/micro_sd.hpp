@@ -22,7 +22,9 @@ void micro_sd_code(void* parameters) {
 
   uint64_t time = 0;
   float altitude = 0;
-
+  bool recovery = false;
+  LoRa.sleep();
+  // digitalWrite(SS, LOW);
   if (!SD.begin(sd_chip_select)) {
     Serial.println("Erro ao abrir o cartão sd!");
     bool status = false;
@@ -37,19 +39,31 @@ void micro_sd_code(void* parameters) {
   while (true) {
     xQueueReceive(micro_sd_queue_altitude, &altitude, portMAX_DELAY);
     xQueueReceive(micro_sd_queue_time, &time, portMAX_DELAY);
+    xQueueReceive(micro_sd_queue_recovery, &recovery, pdMS_TO_TICKS(1));
+    xSemaphoreTake(lora_semaphore, portMAX_DELAY);
+    // LoRa.sleep();
+    // digitalWrite(SS, LOW);
+    // digitalWrite(sd_chip_select, HIGH);
 
     altitude_logger = SD.open("/alt_log.csv", FILE_APPEND);
 
     if (altitude_logger) {
       altitude_logger.print(time);
       altitude_logger.print(",");
-      altitude_logger.println(altitude);
+      altitude_logger.print(altitude);
+      altitude_logger.print(",");
+      altitude_logger.println(recovery);
       altitude_logger.close();
       // count++;
     } else {
       Serial.println("Erro na gravacao");
       digitalWrite(led_pin, LOW);
     }
+    // digitalWrite(SS, HIGH);
+    // digitalWrite(sd_chip_select, LOW);
+    
+    xSemaphoreGive(lora_semaphore);
+
     // if (millis() > timer + 1000) {
     //   Serial.println(count);
     //   while (true) {

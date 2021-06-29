@@ -37,7 +37,7 @@ void read_bmp_code(void* parameters) {
 
 
   }
-  // xQueueReceive(calibration_button_queue_button, &calibration, portMAX_DELAY);
+  xQueueReceive(calibration_button_queue_button, &calibration, portMAX_DELAY);
   uint64_t timer = 0;
   uint64_t initial_timer = millis();
   while (true) {
@@ -50,11 +50,11 @@ void read_bmp_code(void* parameters) {
     // Serial.print("\tAltitude: "); Serial.println(altitude);
     // timer = millis();
     xQueueSend(recovery_queue_altitude, &altitude, portMAX_DELAY);
-    // xQueueSend(sender_lora_queue_altitude, &altitude, portMAX_DELAY);
-    // xQueueSend(sender_lora_queue_time, &timer, portMAX_DELAY);
     xQueueSend(micro_sd_queue_altitude, &altitude, portMAX_DELAY);
     xQueueSend(micro_sd_queue_time, &timer, portMAX_DELAY);
-    xQueueSend(plot_oled_queue_altitude, &altitude, portMAX_DELAY);
+    xQueueSend(sender_lora_queue_altitude, &altitude, portMAX_DELAY);
+    xQueueSend(sender_lora_queue_time, &timer, portMAX_DELAY);
+    // xQueueSend(plot_oled_queue_altitude, &altitude, portMAX_DELAY);
     // xSemaphoreGive(lora_semaphore);
     // vTaskResume(sender_lora_task);
     // xQueueSend(plot_oled_queue_altitude, &altitude, pdMS_TO_TICKS(1));

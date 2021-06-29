@@ -3,7 +3,7 @@
 #include "heltec.h"
 #include "setup_tasks.hpp"
 
-#define BME_SCALE 1
+#define BME_SCALE 2
 
 #define recovery_pin 12
 
@@ -28,11 +28,12 @@ void recovery_code(void* parameters) {
 
   while (true) {
     xQueueReceive(recovery_queue_altitude, &altitude, portMAX_DELAY);
-    xQueueReceive(recovery_queue_calibration, &first, 1);
+    // xQueueReceive(recovery_queue_calibration, &first, 1);
     // xQueueSend(plot_oled_queue_altitude, &altitude, pdMS_TO_TICKS(1));
 
     if (first) {
       first = false;
+      // max_altitude = altitude;
       initial_altitude = altitude;
     }
 
@@ -41,18 +42,19 @@ void recovery_code(void* parameters) {
 
     if (altitude > max_altitude) {
       max_altitude = altitude;
-      xQueueSend(plot_oled_queue_max_altitude, &max_altitude, portMAX_DELAY);
-    } else if (variation > 3 && altitude < (max_altitude - (BME_SCALE * 2))) {
+      // xQueueSend(plot_oled_queue_max_altitude, &max_altitude, portMAX_DELAY);
+    } else if (variation > 10 && altitude < (max_altitude - (BME_SCALE * 2))) {
       if (!recovery) {
         Serial.println("Recovery triggered");
         recovery = true;
         trigger_recovery();
-        // xQueueSend(sender_lora_queue_recovery, &recovery, portMAX_DELAY);
+        xQueueSend(micro_sd_queue_recovery, &recovery, portMAX_DELAY);
+        xQueueSend(sender_lora_queue_recovery, &recovery, portMAX_DELAY);
         xQueueSend(buzzer_alarm_queue_recovery, &recovery, portMAX_DELAY);
-        xQueueSend(plot_oled_queue_recovery, &recovery, portMAX_DELAY);
+        // xQueueSend(plot_oled_queue_recovery, &recovery, portMAX_DELAY);
       }
     }
-    xQueueSend(plot_oled_queue_variation, &variation, portMAX_DELAY);
+    // xQueueSend(plot_oled_queue_variation, &variation, portMAX_DELAY);
     // i++;
     // if (i >= 13) {
     //   Serial.println("Recovery triggered");

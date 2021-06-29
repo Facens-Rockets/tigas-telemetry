@@ -14,7 +14,7 @@ void setup_lora() {
   LoRa.disableCrc();
   LoRa.enableCrc();
   LoRa.setTxPower(20,RF_PACONFIG_PASELECT_PABOOST);
-  LoRa.receive();
+  // LoRa.receive();
 }
 
 #endif // INCLUDE_SETUP_LORA_H__

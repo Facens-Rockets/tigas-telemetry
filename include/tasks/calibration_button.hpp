@@ -26,9 +26,10 @@ void calibration_button_code(void* parameters) {
 
         xQueueSend(calibration_button_queue_button, &calibration,
                    portMAX_DELAY);
-        xQueueSend(error_alarm_queue_calibration_button, &calibration,
-                   portMAX_DELAY);
+        // xQueueSend(error_alarm_queue_calibration_button, &calibration,
+        //            portMAX_DELAY);
         Serial.println("calibrated");
+        vTaskDelete(calibration_button_task);
       }
       // if (!digitalRead(calibration_button_pin)) {
       // }
