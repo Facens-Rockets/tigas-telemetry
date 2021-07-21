@@ -14,12 +14,13 @@ Adafruit_BME280 bme;
 void read_bmp_code(void* parameters) {
   bool first = true;
   bool calibration = false;
-  Wire1.begin(21, 22);
+  // Wire1.begin(21, 22);
+  Wire.begin(4, 15);
 
   // float pressure = 0;
   float altitude = 0;
 
-  bool status_bme = bme.begin(0x76, &Wire1);
+  bool status_bme = bme.begin(0x76, &Wire);
 
   if (!status_bme) {
     Serial.println(
@@ -34,9 +35,9 @@ void read_bmp_code(void* parameters) {
     Serial.print("        ID of 0x61 represents a BME 680.\n");
     // xQueueSend(error_alarm_queue_bmp, &status_bme, portMAX_DELAY);
     vTaskDelete(read_bmp_task);
-
-
   }
+  uint8_t module_ok = 1;
+  xQueueSend(led_queue_bme_ok, &module_ok, portMAX_DELAY);
   xQueueReceive(calibration_button_queue_button, &calibration, portMAX_DELAY);
   uint64_t timer = 0;
   uint64_t initial_timer = millis();
@@ -47,7 +48,7 @@ void read_bmp_code(void* parameters) {
     timer = millis();
 
     // Serial.print("Pressure: "); Serial.print(pressure);
-    // Serial.print("\tAltitude: "); Serial.println(altitude);
+    Serial.println("\tAltitude: "); Serial.println(altitude);
     // timer = millis();
     xQueueSend(recovery_queue_altitude, &altitude, portMAX_DELAY);
     xQueueSend(micro_sd_queue_altitude, &altitude, portMAX_DELAY);

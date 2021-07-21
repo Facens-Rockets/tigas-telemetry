@@ -3,7 +3,7 @@
 #include "setup_tasks.hpp"
 #include "tasks/buzzer_alarm.hpp  "
 
-#define calibration_button_pin 36
+#define calibration_button_pin 22
 
 void calibration_button_code(void* parameters) {
   bool first = true;

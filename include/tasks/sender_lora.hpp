@@ -15,9 +15,9 @@ void sender_lora_code(void* parameters) {
   while(true){
     xQueueReceive(sender_lora_queue_altitude, &altitude, portMAX_DELAY);
     xQueueReceive(sender_lora_queue_time, &time, portMAX_DELAY);
-    xQueueReceive(sender_lora_queue_recovery, &recovery, pdMS_TO_TICKS(1));
-    xSemaphoreTake(lora_semaphore, portMAX_DELAY);
-    LoRa.idle();
+    xQueueReceive(sender_lora_queue_recovery, &recovery, 1);
+    // xSemaphoreTake(lora_semaphore, portMAX_DELAY);
+    // LoRa.idle();
     // Serial.print("\tAltitude: "); Serial.println(altitude);
     // timer = millis();
     LoRa.beginPacket();
@@ -29,8 +29,8 @@ void sender_lora_code(void* parameters) {
     LoRa.endPacket();
     Serial.println("Send Lora");
     // Serial.println(millis()-timer);
-    LoRa.sleep();
-    xSemaphoreGive(lora_semaphore);
+    // LoRa.sleep();
+    // xSemaphoreGive(lora_semaphore);
     vTaskDelay(1);
   }
 }

@@ -6,32 +6,41 @@
 #include "heltec.h"
 #include "setup_tasks.hpp"
 
-#define sd_chip_select 3
+#define MICRO_SD_SCK 33
+#define MICRO_SD_MISO 2
+#define MICRO_SD_MOSI 32
+#define MICRO_SD_CS 23
+
+#define sd_chip_select 23
 #define led_pin 25
 
 File altitude_logger;
 
-// SPIClass * hspi = NULL;
+SPIClass spi1;
 
 void micro_sd_code(void* parameters) {
   pinMode(sd_chip_select, OUTPUT);
   pinMode(led_pin, OUTPUT);
 
-  digitalWrite(SS, LOW);
-  digitalWrite(sd_chip_select, HIGH);
+  SPIClass(1);
+  spi1.begin(MICRO_SD_SCK, MICRO_SD_MISO, MICRO_SD_MOSI, MICRO_SD_CS);
+
+  // digitalWrite(SS, LOW);
+  // digitalWrite(sd_chip_select, HIGH);
 
   uint64_t time = 0;
   float altitude = 0;
   bool recovery = false;
-  LoRa.sleep();
+  // LoRa.sleep();
   // digitalWrite(SS, LOW);
-  if (!SD.begin(sd_chip_select)) {
+  if (!SD.begin(MICRO_SD_CS, spi1)) {
     Serial.println("Erro ao abrir o cartão sd!");
     bool status = false;
     // xQueueSend(error_alarm_queue_micro_sd, &status, portMAX_DELAY);
     ESP.restart();
-    vTaskDelete(micro_sd_task);
   }
+  uint8_t module_ok = 1;
+  xQueueSend(led_queue_sd_ok, &module_ok, portMAX_DELAY);
   digitalWrite(led_pin, HIGH);
 
   // uint64_t timer = millis();
@@ -39,8 +48,8 @@ void micro_sd_code(void* parameters) {
   while (true) {
     xQueueReceive(micro_sd_queue_altitude, &altitude, portMAX_DELAY);
     xQueueReceive(micro_sd_queue_time, &time, portMAX_DELAY);
-    xQueueReceive(micro_sd_queue_recovery, &recovery, pdMS_TO_TICKS(1));
-    xSemaphoreTake(lora_semaphore, portMAX_DELAY);
+    xQueueReceive(micro_sd_queue_recovery, &recovery, 1);
+    // xSemaphoreTake(lora_semaphore, portMAX_DELAY);
     // LoRa.sleep();
     // digitalWrite(SS, LOW);
     // digitalWrite(sd_chip_select, HIGH);
@@ -62,7 +71,7 @@ void micro_sd_code(void* parameters) {
     // digitalWrite(SS, HIGH);
     // digitalWrite(sd_chip_select, LOW);
     
-    xSemaphoreGive(lora_semaphore);
+    // xSemaphoreGive(lora_semaphore);
 
     // if (millis() > timer + 1000) {
     //   Serial.println(count);

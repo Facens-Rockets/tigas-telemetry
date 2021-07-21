@@ -11,6 +11,7 @@ TaskHandle_t sender_lora_task;
 TaskHandle_t micro_sd_task;
 TaskHandle_t calibration_button_task;
 TaskHandle_t error_alarm_task;
+TaskHandle_t led_interface_task;
 
 QueueHandle_t recovery_queue_calibration;
 
@@ -39,7 +40,13 @@ QueueHandle_t error_alarm_queue_calibration_button;
 
 QueueHandle_t calibration_button_queue_button;
 
-SemaphoreHandle_t lora_semaphore;
+QueueHandle_t led_queue_any_error;
+
+QueueHandle_t led_queue_bme_ok;
+QueueHandle_t led_queue_sd_ok;
+
+
+// SemaphoreHandle_t lora_semaphore;
 
 // #include "tasks/plot_oled.hpp"
 #include "tasks/read_bmp.hpp"
@@ -51,20 +58,22 @@ SemaphoreHandle_t lora_semaphore;
 #include "tasks/error_alarm.hpp"
 #include "tasks/sender_lora.hpp"
 // #include "tasks/save_file.hpp"
+#include "tasks/led_interface.hpp"
 
 
 void core_zero(int core = 0) {
   xTaskCreatePinnedToCore(read_bmp_code, "bmp", 3000, NULL, 4, &read_bmp_task, core);
   xTaskCreatePinnedToCore(recovery_code, "recovery", 3000, NULL, 3, &recovery_task, core);
-  // xTaskCreatePinnedToCore(error_alarm_code, "alarm", 3000, NULL, 1, &error_alarm_task, core);
+  xTaskCreatePinnedToCore(led_interface_code, "led", 3000, NULL, 1, &led_interface_task, core);
+  xTaskCreatePinnedToCore(micro_sd_code, "sd", 10000, NULL, 2, &micro_sd_task, core);
 }
+
 void core_one(int core = 1) {
   xTaskCreatePinnedToCore(sender_lora_code, "lora", 2000, NULL, 2, &sender_lora_task, core);
   // xTaskCreatePinnedToCore(sender_lora_code, "lora", 2000, NULL, 3, &sender_lora_task, core);
   xTaskCreatePinnedToCore(calibration_button_code, "calibration", 1000, NULL, 2, &calibration_button_task, core);
   // xTaskCreatePinnedToCore(plot_oled_code, "oled", 2000, NULL, 2, &plot_oled_task, core);
   xTaskCreatePinnedToCore(buzzer_alarm_code, "buzzer", 2000, NULL, 2, &buzzer_alarm_task, core);
-  xTaskCreatePinnedToCore(micro_sd_code, "sd", 10000, NULL, 2, &micro_sd_task, core);
 }
 
 void setup_tasks() {
@@ -77,14 +86,14 @@ void setup_tasks() {
   recovery_queue_calibration = xQueueCreate(1, sizeof(bool));
   
   buzzer_alarm_queue_recovery = xQueueCreate(1, sizeof(bool));
-  
+
   sender_lora_queue_recovery = xQueueCreate(1, sizeof(bool));
   sender_lora_queue_init = xQueueCreate(1, sizeof(bool));
-  sender_lora_queue_altitude = xQueueCreate(1, sizeof(float));
-  sender_lora_queue_time = xQueueCreate(1, sizeof(uint64_t));
+  sender_lora_queue_altitude = xQueueCreate(5, sizeof(float));
+  sender_lora_queue_time = xQueueCreate(5, sizeof(uint64_t));
 
-  micro_sd_queue_altitude = xQueueCreate(1, sizeof(float));
-  micro_sd_queue_time = xQueueCreate(1, sizeof(uint64_t));
+  micro_sd_queue_altitude = xQueueCreate(5, sizeof(float));
+  micro_sd_queue_time = xQueueCreate(5, sizeof(uint64_t));
   micro_sd_queue_recovery = xQueueCreate(1, sizeof(bool));
 
   error_alarm_queue_bmp = xQueueCreate(1, sizeof(bool));
@@ -93,7 +102,11 @@ void setup_tasks() {
 
   calibration_button_queue_button = xQueueCreate(1, sizeof(bool));
 
-  lora_semaphore = xSemaphoreCreateMutex();
+  led_queue_any_error = xQueueCreate(1, sizeof(bool));  
+  led_queue_bme_ok = xQueueCreate(1, sizeof(uint8_t));  
+  led_queue_sd_ok = xQueueCreate(1, sizeof(uint8_t));  
+
+  // lora_semaphore = xSemaphoreCreateMutex();
 
   core_zero();
   core_one();

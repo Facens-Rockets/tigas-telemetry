@@ -22,20 +22,22 @@ void recovery_code(void* parameters) {
   float initial_altitude = 0;
   float max_altitude = 0;
   bool recovery = false;
-  bool first = true;
+  // bool first = true;
   // uint8_t i = 0;
   // uint64_t timer = xTaskGetTickCount();
+  
+  xQueueReceive(recovery_queue_altitude, &initial_altitude, portMAX_DELAY);
 
   while (true) {
     xQueueReceive(recovery_queue_altitude, &altitude, portMAX_DELAY);
     // xQueueReceive(recovery_queue_calibration, &first, 1);
     // xQueueSend(plot_oled_queue_altitude, &altitude, pdMS_TO_TICKS(1));
 
-    if (first) {
-      first = false;
-      // max_altitude = altitude;
-      initial_altitude = altitude;
-    }
+    // if (first) {
+    //   first = false;
+    //   // max_altitude = altitude;
+    //   initial_altitude = altitude;
+    // }
 
     variation = (initial_altitude - altitude) * -1;
 
@@ -43,7 +45,7 @@ void recovery_code(void* parameters) {
     if (altitude > max_altitude) {
       max_altitude = altitude;
       // xQueueSend(plot_oled_queue_max_altitude, &max_altitude, portMAX_DELAY);
-    } else if (variation > 10 && altitude < (max_altitude - (BME_SCALE * 2))) {
+    } else if (variation > 2 && altitude < (max_altitude - (BME_SCALE * 2))) {
       if (!recovery) {
         Serial.println("Recovery triggered");
         recovery = true;
@@ -51,6 +53,7 @@ void recovery_code(void* parameters) {
         xQueueSend(micro_sd_queue_recovery, &recovery, portMAX_DELAY);
         xQueueSend(sender_lora_queue_recovery, &recovery, portMAX_DELAY);
         xQueueSend(buzzer_alarm_queue_recovery, &recovery, portMAX_DELAY);
+        // vTaskDelete(recovery_task);
         // xQueueSend(plot_oled_queue_recovery, &recovery, portMAX_DELAY);
       }
     }
