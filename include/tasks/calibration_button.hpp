@@ -1,9 +1,9 @@
 #ifndef INCLUDE_TASKS_CALIBRATION_BUTTON_H__
 #define INCLUDE_TASKS_CALIBRATION_BUTTON_H__
-#include "setup_tasks.hpp"
+#include "setups/setup_tasks.hpp"
 #include "tasks/buzzer_alarm.hpp  "
 
-#define calibration_button_pin 22
+#define calibration_button_pin 17
 
 void calibration_button_code(void* parameters) {
   bool first = true;
@@ -24,11 +24,14 @@ void calibration_button_code(void* parameters) {
         vTaskDelay(pdMS_TO_TICKS(200));
         digitalWrite(buzzer_pin, LOW);
 
-        xQueueSend(calibration_button_queue_button, &calibration,
+        xQueueSend(read_bmp_queue_calibration, &calibration,
+                   portMAX_DELAY);
+        xQueueSend(gps_queue_calibration, &calibration,
                    portMAX_DELAY);
         // xQueueSend(error_alarm_queue_calibration_button, &calibration,
         //            portMAX_DELAY);
         Serial.println("calibrated");
+        bluetooth_serial.println("calibrated");
         vTaskDelete(calibration_button_task);
       }
       // if (!digitalRead(calibration_button_pin)) {
