@@ -1,7 +1,7 @@
 #ifndef INCLUDE_SETUPS_SETUP_GPS_H__
 #define INCLUDE_SETUPS_SETUP_GPS_H__
 #include <SoftwareSerial.h>
-#include <TinyGPS++.h>
+#include <TinyGPSPlus.h>
 
 #define GPS_TX 0
 #define GPS_RX 22

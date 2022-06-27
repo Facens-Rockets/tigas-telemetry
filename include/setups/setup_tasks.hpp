@@ -56,7 +56,7 @@ SemaphoreHandle_t debug_semaphore;
 #include "tasks/micro_sd.hpp"
 #include "tasks/calibration_button.hpp"
 #include "tasks/sender_lora.hpp"
-#include "tasks/gps.hpp"
+// #include "tasks/gps.hpp"
 #include "tasks/debug.hpp"
 
 

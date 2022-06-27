@@ -5,7 +5,7 @@
 #include "setups/setup_lora.hpp"
 #include "setups/setup_bme.hpp"
 #include "setups/setup_sd.hpp"
-#include "setups/setup_gps.hpp"
+// #include "setups/setup_gps.hpp"
 #include "setups/setup_tasks.hpp"
 
 void setup() {
